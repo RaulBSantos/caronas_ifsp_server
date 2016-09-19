@@ -1,0 +1,16 @@
+{
+  "name": "wk_caronas",
+  "version": "1.0.0",
+  "description": "Workspace para trabalhar servidor do projeto de caronas. TCC João e Raul",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "João e Raul",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^2.2.9",
+    "request": "^2.74.0",
+    "restify": "^5.0.0-beta-1"
+  }
+}
