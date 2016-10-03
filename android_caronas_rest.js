@@ -132,19 +132,18 @@ server.post('/caronas/login',function(req, res) {
 
   var response_code;
 
-  moodle_auth.checkUserExists(record_value, pass_value, res, function(existsUser, res){ 
+  moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
     var response_code;
 
-      if(existsUser){
-          response_code = 200;
+      if(isMoodleUserOk){
+        getUserInformation
+        response_code = 200;
       }else{
-          response_code = 401;
+        response_code = 401;
       }
-
+      console.log("Pront: "+ record_value +", Senha: "+  pass_value + " Response: "+response_code);
       res.send(response_code);
     });
-  
-  res.send(response_code);
 });
 
 // method Receives JSON user and coordinates
