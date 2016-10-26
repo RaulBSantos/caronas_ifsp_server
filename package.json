@@ -11,6 +11,19 @@
   "dependencies": {
     "mongodb": "^2.2.9",
     "request": "^2.74.0",
-    "restify": "^5.0.0-beta-1"
-  }
+    "restify": "^5.0.0-beta-1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://raulbolsantos@bitbucket.org/tcc_gang/car_serv.git"
+  },
+  "keywords": [
+    "car",
+    "pool",
+    "caronas",
+    "tcc"
+  ],
+  "homepage": "https://bitbucket.org/tcc_gang/car_serv#readme"
 }

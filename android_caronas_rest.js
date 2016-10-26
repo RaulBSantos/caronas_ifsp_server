@@ -63,7 +63,7 @@ Objects that API Rest uses
 
 
 */
-/*
+
 var underscore = require('underscore');
 
 // Array to storage the Database - Create as Object Oriented
@@ -105,14 +105,13 @@ function User(id_value, name_value, record_value, password_value, latitude_value
   this.vacancy = vacancy;
 }
 
-*/
-
 
 /*
 Rest API
 */
 
 // importa a bibliioteca retify e fs
+//var request = require('request');
 var restify = require('restify');
 var fs = require('fs');
 
@@ -129,14 +128,13 @@ server.use(restify.bodyParser({mapParams : true}))
 server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
-
   var response_code;
 
   moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
     var response_code;
-
+      console.log("in method"+record_value + " : "+pass_value);
       if(isMoodleUserOk){
-        getUserInformation
+        
         response_code = 200;
       }else{
         response_code = 401;
@@ -207,6 +205,68 @@ server.get('/caronas/getRides',function(req, res) {
   res.end();
 
 });
+
+// Recebe os dados para enviar para a APIGoogleDirections
+server.post('/caronas/sendToDirectionsApi',function(req, res) {
+  var path = "http://maps.googleapis.com/maps/api/directions/json?";
+  var origin = req.params.origin;
+  var destination = req.params.destination;
+  var waypoints = req.params.intermediate;
+
+  console.log(req.params.origin);
+  console.log(req.params.destination);
+  console.log(req.params.intermediate);
+  
+  //  lat/lng : (-22.8724543,-46.7909133)
+  // lat/lng : (-22.8724543,-46.7909133)
+  // "parse"
+  /*if(origin !== undefined && destination !== undefined){
+    origin = "origin="+parseToApiCoordinates(req.params.origin);
+    destination = "destination="+parseToApiCoordinates(req.params.destination);
+
+    /*
+    path += origin + destination;
+    if(waypoints !== undefined){
+      waypoints = "waypoints="+parseToApiCoordinates(req.params.intermediate);
+      path += waypoints;
+    }
+    
+    var headers = {
+        'User-Agent': 'Super Agent/0.0.1'
+    }
+
+    var options = {
+      url : path,
+      method : 'GET',
+      headers: headers
+    }
+    
+    // Send request
+    request(options, function(error, response, body){
+
+    });  
+
+
+   
+
+  }
+   */
+
+  var response_code;
+  res.send(response_code);
+});
+
+/*
+var parseToApiCoordinates = function(obj){
+
+  var ret = obj.substring(obj.indexOf("(") + 1,obj.indexOf(")"));
+  return ret
+};
+
+
+*/
+
+
 
 // Returns 10 nearst users
 server.get('/getNeartesUsersAndPools',function(req, res) {
