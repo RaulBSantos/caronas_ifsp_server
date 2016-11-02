@@ -84,15 +84,16 @@ DB.prototype.getRides = function (search_ride) {
     return _.filter(this.getAllUsers, {can_give_ride : search_ride});
 };
 
-var db = undefined;
+var db_test = undefined;
 
 var getDb = function(){
   // If already exists, get the same, else create a new
-  db = db || new DB();
+  db_test = db_test || new DB();
 
-  return db;
+  return db_test;
 };
 
+/*
 function User(id_value, name_value, record_value, password_value, latitude_value, longitude_value,can_give_ride_value,vacancy){
   this.id = id_value;
   this.name = name_value;
@@ -105,6 +106,8 @@ function User(id_value, name_value, record_value, password_value, latitude_value
   this.vacancy = vacancy;
 }
 
+*/
+
 
 /*
 Rest API
@@ -114,8 +117,12 @@ Rest API
 //var request = require('request');
 var restify = require('restify');
 var fs = require('fs');
+// Arquivo para autenticação com o moodle
+var moodle_auth = require('./moodle/moodle-validation');
+// Arquivo para gerenciar notificações do Firebase
+var notification = require('./notification/firebase-notification');
 
-var moodle_auth = require('./moodle-validation');
+var dao = require('./dao/caronas_dao');
 
 // Sintaxe para criar um server
 var server = restify.createServer();
@@ -128,20 +135,52 @@ server.use(restify.bodyParser({mapParams : true}))
 server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
-  var response_code;
+  var firebase_id_value = req.params.firebaseId;
 
-  moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
+  var response_code;
+  var isUserRegistred;
+
+  var userToRegister = new dao.User({record : record_value, firebaseId : firebase_id_value });
+  // Busca o usuário no banco de dados do Servidor, caso não encontre, devolve 302 para o usuário se cadastrar
+  dao.findUserByRecordSendStatus(userToRegister, function(err,model){
+    
+    isUserRegistred = model !== null;
+
+    moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
     var response_code;
-      console.log("in method"+record_value + " : "+pass_value);
+      console.log("in method"+record_value + " : "+"####" + " firebase : "+firebase_id_value);
+      // Usuário está ativo no Moodle?
       if(isMoodleUserOk){
+        // Usuário já está cadsatrado no Servidor de Caronas?
+        if(isUserRegistred){
+          response_code = 200;
+          console.log("User OK");
+        }else{
+          // Adiciona o Usuário ao banco, caso não exista.
+          dao.saveUser(userToRegister);
+          // Irá redirecionar para a tela de cadastro
+          response_code = 302;
+        }
         
-        response_code = 200;
       }else{
+        console.log("User INVALID");
         response_code = 401;
       }
-      console.log("Pront: "+ record_value +", Senha: "+  pass_value + " Response: "+response_code);
+      console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_code);
+      
+
       res.send(response_code);
     });
+
+  });
+
+
+});
+
+// Teste Firebase
+server.get('/firebase',function(req, res) {
+  notification.sendNotification();
+  res.end();
 });
 
 // method Receives JSON user and coordinates
@@ -150,24 +189,19 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var longitude_value = req.params.longitude;
   var name_value = req.params.name;
   var record_value = req.params.record;
+  
   var password_value = req.params.password;
   var can_give_ride = req.params.canGiveRide;
-  var vacancy = req.params.vacancy;
 
+  // Cria um objeto User
+  var user = new dao.User({name : name_value, record : record_value, 
+                  canGiveRide : can_give_ride,
+                  location : {latitude : latitude_value, longitude : longitude_value} 
+             });
+  // Salva no banco o objeto User ou atualiza o objeto já existente
+  //FIXME Testar
+  dao.findOneAndUpdate(user);
 
-
-  var user = new User(getDb().getAllUsers().length ,name_value, record_value, password_value, latitude_value, longitude_value, can_give_ride, vacancy);
-
-  getDb().addUser(user);
-
-  console.log('User: '+name_value+' Record:  '+record_value+' Password: '+password_value);
-  console.log('\nlat: '+latitude_value+' lon: '+longitude_value);
-  console.log('\n Oferece carona? ' +can_give_ride);
-  if(can_give_ride){
-    console.log('\n Vagas: ' +vacancy);
-  }
-  console.log('\n\n\n***');
-  console.log("Content of array: " + getDb().getAllUsers() + "\n *** \t Number of entries: "+ getDb().getAllUsers().length);
 
   res.send(200);
 });
@@ -307,77 +341,41 @@ server.get('/',function(req, res) {
   res.end();
 });
 
-/*
+
+
 
 // Teste Mongo Db
 server.get('/caronas/teste-write',function(req, res) {
   
-  console.log("Criando uma Carona com 'promise'..");
+  console.log("Criando um usuário");
 
-  var testeCarona = new Carona({
-    ativa : true ,
-    vagas : 69
+  var testeUser = new dao.User({
+    name : "Maria",
+    record : "12345678",
+    location : {latitude : 1345, longitude : 5432},
+    canGiveRide : true,
   });
+  console.log("Chamando o método de dao.saveUser(user)");
+  console.log(testeUser);
+  dao.findOneAndUpdate(testeUser);
 
-  var promise = testeCarona.save(); 
-  
-  promise.then(function(caronas){
-    console.log("Info: "+caronas);
-    console.log("Carona criada com sucesso");
-    res.write(testeCarona);
-    res.send(response_code);
-  })
-  .catch(function(err){
-    console.log('Erro: ', err);
-    res.send(response_code);
-  });
 
 });
 
 server.get('/caronas/teste-read',function(req, res) {
   
-  console.log("Buscando todas as caronas");
-
-  Carona.find(function (err, caronas){
-    if(err) throw err;
-    res.write(caronas);
-    console.log(caronas);
+  var testeUser = new dao.User({record : "000"});
+  dao.findUserByRecord(testeUser, function(doc){
+    if(doc === null || doc === undefined)
+      // Responde que será preciso se cadastrar
+      res.send(302);
   });
+  console.log('doc = '+ doc);
 
-  
-
-  res.send(response_code);
+  res.send(200);
 });
-
-*/
 
 // Start server
 server.listen(8080, function() {
   console.log('Online: 8080');
 });
-
-
-// Just to console Test
-/*
-
-var funnctionRest = function(){
-  var latitude_value = "req.params.latitude";
-  var longitude_value = "req.params.longitude";
-  var name_value = "req.params.name";
-  var record_value = "req.params.record";
-  var password_value = "req.params.password";
-
-  var user = new User(getDb().getAllUsers().length ,name_value, record_value, password_value, latitude_value, longitude_value);
-
-  getDb().addUser(user);
-
-  console.log('User: '+name_value+' Record:  '+record_value+' Password: '+password_value);
-  console.log('\nlat: '+latitude_value+' lon: '+longitude_value);
-  console.log('\n\n\n***');
-};
-
-*/
-
-// Android Sends realtime location and canGivePool of especific user. Receives the most near User's name and location - to draw on map
-
-// Server Sends Json filtering by min difference between Android user and the DB Users - Too Filtering if canGivePool its true or false (Two different methods)
