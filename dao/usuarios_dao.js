@@ -11,6 +11,16 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   // Conectado
+  // Criando um Schema de carona
+  var rideSchema = mongoose.Schema({
+  	daysOFWeek : [String],
+  	ways : [{
+  		direction : String, hour : String, numberVacancy : Number
+  	}],
+  	route : {}
+  });
+
+
   // Criando um Schema do usuário
   var userSchema = mongoose.Schema({
   	name : String,
@@ -18,10 +28,7 @@ db.once('open', function() {
   	firebaseId : String,
   	canGiveRide : Boolean,
   	location : {latitude : Number, longitude : Number},
-  	ridesOffer : [{ 
-  		goTime : Date, backTime : Date, vacancy : Number, 
-  		routes : [{latitude : Number, longitude : Number }] 
-  	}],
+  	ridesOffer : [rideSchema],
   	ridesAsked : [{
   		rideId 		: String, 
   		driverId 	: String }]
@@ -50,7 +57,6 @@ exports.saveUser = function(user){
 // Busca um usuário por prontuário, executa a função de callback após a busca
 exports.findUserByRecordSendStatus = function(user, callback){
 	var userExists;
-	console.log('findUser()' + user);
 
 	//var query = 
 	exports.User.findOne({record : user.record}, callback);
@@ -73,19 +79,8 @@ exports.findUserByRecordSendStatus = function(user, callback){
 
 };
 
-exports.findUserByRecord = function(user){
-	console.log('findUser()' + user);
-
-	var query = exports.User.findOne({record : user.record});
-	assert.ok(!(query instanceof require('mpromise')));
-
-	query.then(function(doc){
-		console.log("Encontrou o doc: "+doc);
-	});
-
-	var promise = query.exec();
-	assert.ok(promise instanceof require('mpromise'));
-
+exports.findUserByRecord = function(record, callback){
+	exports.User.findOne({record : record}, callback);
 };
 // Update or insert 
 exports.findOneAndUpdate = function(user){
@@ -98,13 +93,32 @@ exports.findOneAndUpdate = function(user){
 		userObj,// Documento que será inserido caso nada seja encontrado
 		{upsert: true, new : true}, function(err, doc){
 			if(err){
-				console.log(err);
+				console.error(err);
 			}else{
 				console.log(doc);
 			}
 
 		});
 };
+
+exports.findAllUsers = function(callback){
+	exports.User.find(function (err,users){
+		if(err) return console.error(err);
+		console.log(users);
+		// Executa função de callback com o retorno
+		callback(users);
+	})
+};
+
+exports.saveRideIntoUser = function(ride, user){
+	user.ridesOffer.push*(ride);
+
+	user.save(function(err){
+		if (err) {return console.error(err);}
+		console.log("Carona cadastrada: "+user);
+	})
+
+}
 
 /*
 

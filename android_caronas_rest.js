@@ -122,7 +122,7 @@ var moodle_auth = require('./moodle/moodle-validation');
 // Arquivo para gerenciar notificações do Firebase
 var notification = require('./notification/firebase-notification');
 
-var dao = require('./dao/caronas_dao');
+var user_dao = require('./dao/usuarios_dao');
 
 // Sintaxe para criar um server
 var server = restify.createServer();
@@ -135,39 +135,33 @@ server.use(restify.bodyParser({mapParams : true}))
 server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
-  var firebase_id_value = req.params.firebaseId;
 
   var response_code;
+  // Boolean - Usuário já existe na base de dados do Servidor?
   var isUserRegistred;
 
-  var userToRegister = new dao.User({record : record_value, firebaseId : firebase_id_value });
+  var userToRegister = new user_dao.User({record : record_value });
   // Busca o usuário no banco de dados do Servidor, caso não encontre, devolve 302 para o usuário se cadastrar
-  dao.findUserByRecordSendStatus(userToRegister, function(err,model){
+  user_dao.findUserByRecordSendStatus(userToRegister, function(err,model){
     
     isUserRegistred = model !== null;
 
     moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
     var response_code;
-      console.log("in method"+record_value + " : "+"####" + " firebase : "+firebase_id_value);
       // Usuário está ativo no Moodle?
       if(isMoodleUserOk){
         // Usuário já está cadsatrado no Servidor de Caronas?
         if(isUserRegistred){
           response_code = 200;
-          console.log("User OK");
         }else{
-          // Adiciona o Usuário ao banco, caso não exista.
-          dao.saveUser(userToRegister);
           // Irá redirecionar para a tela de cadastro
           response_code = 302;
         }
         
       }else{
-        console.log("User INVALID");
         response_code = 401;
       }
       console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_code);
-      
 
       res.send(response_code);
     });
@@ -190,31 +184,51 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var name_value = req.params.name;
   var record_value = req.params.record;
   
-  var password_value = req.params.password;
   var can_give_ride = req.params.canGiveRide;
 
-  // Cria um objeto User
-  var user = new dao.User({name : name_value, record : record_value, 
-                  canGiveRide : can_give_ride,
-                  location : {latitude : latitude_value, longitude : longitude_value} 
-             });
-  // Salva no banco o objeto User ou atualiza o objeto já existente
-  //FIXME Testar
-  dao.findOneAndUpdate(user);
+  console.log("lat: "+latitude_value + "lon "+longitude_value+ "name "+name_value + "rec : "+record_value+" pode dar carona: " + can_give_ride);
 
+
+  //var firebase_id_value = req.params.firebaseId;
+
+  //console.log("firebaseId : "+firebase_id_value);
+
+  // Cria um objeto User
+  var user = new user_dao.User({name : name_value, record : record_value, 
+                  canGiveRide : can_give_ride,
+                  location : {latitude : latitude_value, longitude : longitude_value}
+                  
+             });
+  //FIXME Testar
+  user_dao.saveUser(user);
 
   res.send(200);
 });
+
+// Register ride
+server.post('/caronas/register_ride',function(req, res) {
+  console.log(req.params);
+
+  res.send(200);
+});
+
 // Returns all users
 server.get('/caronas/getAllUsersAndPools',function(req, res) {
-  var bodyHtml = JSON.stringify(getDb().getAllUsers());
 
-  res.writeHead(200, {
-    'Content-Length': Buffer.byteLength(bodyHtml),
-    'Content-Type': 'application/json'
-  });
-  res.write(bodyHtml);
-  res.end();
+  user_dao.findAllUsers(function(users){
+    var bodyHtml = JSON.stringify(users);
+    // Teste
+    console.log("body: "+bodyHtml);
+
+    res.writeHead(200, {
+      'Content-Length': Buffer.byteLength(bodyHtml),
+      'Content-Type': 'application/json'
+    });
+    res.write(bodyHtml);
+    res.end();
+  })
+
+  
 });
 
 // Test filtering
@@ -349,28 +363,27 @@ server.get('/caronas/teste-write',function(req, res) {
   
   console.log("Criando um usuário");
 
-  var testeUser = new dao.User({
+  var testeUser = new user_dao.User({
     name : "Maria",
     record : "12345678",
     location : {latitude : 1345, longitude : 5432},
     canGiveRide : true,
   });
-  console.log("Chamando o método de dao.saveUser(user)");
+  console.log("Chamando o método de user_dao.saveUser(user)");
   console.log(testeUser);
-  dao.findOneAndUpdate(testeUser);
+  user_dao.findOneAndUpdate(testeUser);
 
 
 });
 
 server.get('/caronas/teste-read',function(req, res) {
   
-  var testeUser = new dao.User({record : "000"});
-  dao.findUserByRecord(testeUser, function(doc){
+  user_dao.findUserByRecord("136208-9", function(doc){
     if(doc === null || doc === undefined)
       // Responde que será preciso se cadastrar
-      res.send(302);
+      console.log("não encontrado");
   });
-  console.log('doc = '+ doc);
+  console.log('doc = '+ doc+'test');
 
   res.send(200);
 });
