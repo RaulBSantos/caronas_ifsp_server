@@ -17,14 +17,13 @@ exports.checkUserExists = function(record, pass, res, callback){
 	    headers: headers,
 	    form: {username : record, password : pass, Submit : "Login"}
 	}
-
 	// Start the request
 	request(options, function (error, response, body) {
-    if (!error && response.statusCode == 303) {
-    	existsUser = true;
-    }
-    
-    callback(existsUser, res);
+	    if (!error && response.statusCode == 303) {
+	    	existsUser = true;
+	    }
+	    
+	    callback(existsUser, res);
     
 	})
 };

@@ -145,7 +145,7 @@ server.post('/caronas/login',function(req, res) {
   user_dao.findUserByRecordSendStatus(userToRegister, function(err,model){
     
     isUserRegistred = model !== null;
-
+    
     moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
     var response_code;
       // Usuário está ativo no Moodle?
@@ -173,6 +173,7 @@ server.post('/caronas/login',function(req, res) {
 
 // Teste Firebase
 server.get('/firebase',function(req, res) {
+  console.log(req);
   notification.sendNotification();
   res.end();
 });
@@ -183,10 +184,11 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var longitude_value = req.params.longitude;
   var name_value = req.params.name;
   var record_value = req.params.record;
+  var firebaseId_value = req.params.firebaseId;
   
   var can_give_ride = req.params.canGiveRide;
 
-  console.log("lat: "+latitude_value + "lon "+longitude_value+ "name "+name_value + "rec : "+record_value+" pode dar carona: " + can_give_ride);
+  console.log("lat: "+latitude_value + "lon "+longitude_value+ "name "+name_value + "rec : "+record_value+" pode dar carona: " + can_give_ride +" firebaseId: "+firebaseId_value);
 
 
   //var firebase_id_value = req.params.firebaseId;
@@ -196,8 +198,8 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
   // Cria um objeto User
   var user = new user_dao.User({name : name_value, record : record_value, 
                   canGiveRide : can_give_ride,
-                  location : {latitude : latitude_value, longitude : longitude_value}
-                  
+                  location : {latitude : latitude_value, longitude : longitude_value},
+                  firebaseId : firebaseId_value
              });
   //FIXME Testar
   user_dao.saveUser(user);
@@ -207,7 +209,21 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
 
 // Register ride
 server.post('/caronas/register_ride',function(req, res) {
-  console.log(req.params);
+  var jsonRide = req.params.nameValuePairs;
+  console.log(jsonRide.driver);
+  console.log(jsonRide.daysOfWeek);
+  console.log(jsonRide.ways);
+
+  // Cria um objeto User
+  var user = new user_dao.User({record : jsonRide.driver.record });
+  // Cria um objecto Ride
+  var ride = new user_dao.Ride({daysOfWeek : jsonRide.daysOfWeek, ways : jsonRide.ways});
+
+  // Adiciona a carona ao Usuário
+  user.ridesOffer.push(ride);
+
+  user_dao.findOneAndUpdate(user);
+
 
   res.send(200);
 });

@@ -13,28 +13,30 @@ db.once('open', function() {
   // Conectado
   // Criando um Schema de carona
   var rideSchema = mongoose.Schema({
-  	daysOFWeek : [String],
+  	daysOfWeek : [String],
   	ways : [{
-  		direction : String, hour : String, numberVacancy : Number
+  		direction : {type : String}, time :{type : String}, vacancyNumber : {type : Number}
   	}],
-  	route : {}
+  	route : {},
+  	usersPending : []
   });
 
+  var Ride = mongoose.model('Ride', rideSchema);
+
+  exports.Ride = Ride;
 
   // Criando um Schema do usuário
   var userSchema = mongoose.Schema({
-  	name : String,
-  	record : String,
-  	firebaseId : String,
-  	canGiveRide : Boolean,
+  	name : {type : String},
+  	record : {type : String, unique : true},
+  	firebaseId : {type : String, unique: true},
+  	canGiveRide : {type : Boolean},
   	location : {latitude : Number, longitude : Number},
   	ridesOffer : [rideSchema],
   	ridesAsked : [{
-  		rideId 		: String, 
-  		driverId 	: String }]
+  		rideId 		: {type : String}, 
+  		driverId 	: {type : String} }]
   });
-  // Definindo os métodos estáticos
-
   // Convertendo o Schema em um Model do usuário
   var User = mongoose.model('User', userSchema);
   // Tornando pública
@@ -111,12 +113,10 @@ exports.findAllUsers = function(callback){
 };
 
 exports.saveRideIntoUser = function(ride, user){
-	user.ridesOffer.push*(ride);
-
-	user.save(function(err){
-		if (err) {return console.error(err);}
-		console.log("Carona cadastrada: "+user);
-	})
+	console.log(user);
+	user.ridesOffer.push(ride);
+	console.log("saving ride in user...");
+	exports.findOneAndUpdate(user);
 
 }
 
