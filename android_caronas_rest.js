@@ -9,11 +9,19 @@
 
 var restify = require('restify'); // REST
 var fs = require('fs'); // Manipular arquivos
+var log4js = require('log4js'); // Logs
+/*
+	Configuração do log
+*/
+log4js.clearAppenders(); // Para remover a saída padrão para o console
+log4js.loadAppender('file');
+log4js.addAppender(log4js.appenders.file('logs/caronas-ifsp.log'), 'caronas-ifsp');
+var logger = log4js.getLogger('caronas-ifsp');
 
 /*
 	Bibliotecas próprias
 */
-
+logger.debug('Carregando as dependências próprias...')
 var moodle_auth = require('./moodle/moodle-validation');
 var notification = require('./notification/firebase-notification');
 var user_dao = require('./dao/usuarios_dao');
