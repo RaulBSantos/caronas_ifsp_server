@@ -124,8 +124,14 @@ var notification = require('./notification/firebase-notification');
 
 var user_dao = require('./dao/usuarios_dao');
 
+// Opções do servidor - Utilizar um certificado SSL
+var optionsServer = {
+  key : fs.readFileSync('ssl_keys/privkey1.pem'),
+  certificate : fs.readFileSync('ssl_keys/fullchain1.pem')
+};
+
 // Sintaxe para criar um server
-var server = restify.createServer();
+var server = restify.createServer(optionsServer);
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.jsonp());
