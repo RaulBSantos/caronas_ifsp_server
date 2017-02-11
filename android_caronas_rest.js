@@ -1,143 +1,42 @@
-/*
-/*
-Mongo DataBase
-*/
-// Mongoose - API para utilizar o mongoDB
-/*
-
-var mongoose = require('mongoose');
-
-var db_2 = mongoose.connection;
-
-db_2.on('error', console.error);
-db_2.once('open', function(){
-  console.log('Conectado ao mongoDB');
-
-  mongoose.Promise = require('bluebird');
-  mongoose.connect('mongodb://localhost/test');
-
-
-});
-
-var Schema = mongoose.Schema;
-
-var caronaSchema = new Schema({
-  ativa : Boolean,
-  vagas : Number
-});
-
-var Carona = mongoose.model('Carona', caronaSchema);
-
-var usuarioSchema = new Schema({
-  nome : String,
-  prontuario : String,
-  senha : String,
-  telefone : String,
-  podeDarCarona: Boolean,
-  localPartida : {latitude : Number, longitude : Number },
-});
-
-var Usuario = mongoose.model('Usuario', usuarioSchema);
-
-
-
-*/
-// Testing MongoDB
-/*var raulUser = new usuarioSchema({ nome : "Raul",prontuario : "136208-9",
-senha : "senha",
-telefone : "99843-0260",
-podeDarCarona: true,
-localPartida : {latitude : 22, longitude : 26 }
-});
-var caronaTest = new Carona({ ativa : false, vagas : 2 });
-
-
-
-
-
-
-// Test Find
+/* ##########
+	Rest API
+   ##########
+*/ 
 
 /*
-Objects that API Rest uses
-
-
+	Bibliotecas de terceiros
 */
 
-var underscore = require('underscore');
-
-// Array to storage the Database - Create as Object Oriented
-function DB(){
-  this.users_array =[];
-}
-
-// Methods of DB
-DB.prototype.addUser = function(user){
-  this.users_array.push(user);
-};
-
-DB.prototype.getAllUsers = function(){
-  return this.users_array;
-};
-
-DB.prototype.getRides = function (search_ride) {
-    return _.filter(this.getAllUsers, {can_give_ride : search_ride});
-};
-
-var db_test = undefined;
-
-var getDb = function(){
-  // If already exists, get the same, else create a new
-  db_test = db_test || new DB();
-
-  return db_test;
-};
+var restify = require('restify'); // REST
+var fs = require('fs'); // Manipular arquivos
 
 /*
-function User(id_value, name_value, record_value, password_value, latitude_value, longitude_value,can_give_ride_value,vacancy){
-  this.id = id_value;
-  this.name = name_value;
-  this.record = record_value;
-  this.password = password_value;
-  this.phone = undefined;
-  this.latitude = latitude_value;
-  this.longitude = longitude_value;
-  this.can_give_ride = can_give_ride_value;
-  this.vacancy = vacancy;
-}
-
+	Bibliotecas próprias
 */
 
-
-/*
-Rest API
-*/
-
-// importa a bibliioteca retify e fs
-//var request = require('request');
-var restify = require('restify');
-var fs = require('fs');
-// Arquivo para autenticação com o moodle
 var moodle_auth = require('./moodle/moodle-validation');
-// Arquivo para gerenciar notificações do Firebase
 var notification = require('./notification/firebase-notification');
-
 var user_dao = require('./dao/usuarios_dao');
 
-// Opções do servidor - Utilizar um certificado SSL
+/*
+ 	Certificado SSL
+*/
 var optionsServer = {
   key : fs.readFileSync('ssl_keys/privkey1.pem'),
   certificate : fs.readFileSync('ssl_keys/fullchain1.pem')
 };
 
-// Sintaxe para criar um server
+// Criação do servidor REST
 var server = restify.createServer(optionsServer);
-
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.jsonp());
 server.use(restify.bodyParser({mapParams : true}))
 
-// method Receives JSON login
+/*
+ 	Rotas de URL's e respectivas funções
+*/
+
+// Função de login
 server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
@@ -184,7 +83,7 @@ server.get('/firebase',function(req, res) {
   res.end();
 });
 
-// method Receives JSON user and coordinates
+// Função que registra o usuário recebido por JSON
 server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var latitude_value = req.params.latitude;
   var longitude_value = req.params.longitude;
@@ -196,24 +95,19 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
 
   console.log("lat: "+latitude_value + "lon "+longitude_value+ "name "+name_value + "rec : "+record_value+" pode dar carona: " + can_give_ride +" firebaseId: "+firebaseId_value);
 
-
-  //var firebase_id_value = req.params.firebaseId;
-
-  //console.log("firebaseId : "+firebase_id_value);
-
   // Cria um objeto User
   var user = new user_dao.User({name : name_value, record : record_value, 
                   canGiveRide : can_give_ride,
                   location : {latitude : latitude_value, longitude : longitude_value},
                   firebaseId : firebaseId_value
              });
-  //FIXME Testar
+
   user_dao.saveUser(user);
 
   res.send(200);
 });
 
-// Register ride
+// Função que registra uma carona ao usuário
 server.post('/caronas/register_ride',function(req, res) {
   var jsonRide = req.params.nameValuePairs;
   console.log(jsonRide.driver);
@@ -234,7 +128,7 @@ server.post('/caronas/register_ride',function(req, res) {
   res.send(200);
 });
 
-// Returns all users
+// *** APENAS PARA TESTE !!! *** Função que retorna todos os dados registrados no banco
 server.get('/caronas/getAllUsersAndPools',function(req, res) {
 
   user_dao.findAllUsers(function(users){
@@ -341,8 +235,6 @@ var parseToApiCoordinates = function(obj){
 // Returns 10 nearst users
 server.get('/getNeartesUsersAndPools',function(req, res) {
 
-
-
   var latitude_value = req.params.latitude;
   var longitude_value = req.params.longitude;
   var can_give_ride = req.params.canGiveride;
@@ -360,10 +252,10 @@ server.get('/getNeartesUsersAndPools',function(req, res) {
 });
 
 
-// Home page:
+// *** APENAS PARA TESTE !!! ***Home page
 server.get('/',function(req, res) {
   var bodyHtml = '<!DOCTYPE html><html><head><title>'
-  + 'Teste Node.js - O Bom Programador</title></head>'
+  + 'Teste Node.js - Validando o servidor..</title></head>'
   + '<body>'
   + '<br/>Ok, funcionando';
 
@@ -377,38 +269,6 @@ server.get('/',function(req, res) {
   res.end();
 });
 
-
-
-
-// Teste Mongo Db
-server.get('/caronas/teste-write',function(req, res) {
-  
-  console.log("Criando um usuário");
-
-  var testeUser = new user_dao.User({
-    name : "Maria",
-    record : "12345678",
-    location : {latitude : 1345, longitude : 5432},
-    canGiveRide : true,
-  });
-  console.log("Chamando o método de user_dao.saveUser(user)");
-  console.log(testeUser);
-  user_dao.findOneAndUpdate(testeUser);
-
-
-});
-
-server.get('/caronas/teste-read',function(req, res) {
-  
-  user_dao.findUserByRecord("136208-9", function(doc){
-    if(doc === null || doc === undefined)
-      // Responde que será preciso se cadastrar
-      console.log("não encontrado");
-  });
-  console.log('doc = '+ doc+'test');
-
-  res.send(200);
-});
 
 // Start server
 server.listen(8080, function() {

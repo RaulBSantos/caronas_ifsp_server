@@ -27,5 +27,3 @@ exports.checkUserExists = function(record, pass, res, callback){
     
 	})
 };
-
-//var test = checkUserExists('136208-9','senhaerrada', function(existsUser){console.log(existsUser)});
