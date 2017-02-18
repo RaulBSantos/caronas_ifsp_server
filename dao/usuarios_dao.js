@@ -56,30 +56,6 @@ exports.saveUser = function(user){
 	*/
     
 };
-// Busca um usuário por prontuário, executa a função de callback após a busca
-exports.findUserByRecordSendStatus = function(user, callback){
-	var userExists;
-
-	//var query = 
-	exports.User.findOne({record : user.record}, callback);
-	/*
-	assert.ok(!(query instanceof require('mpromise')));
-
-	query.then(function(doc){
-		// Checa se usuário existe na base
-		userExists = (doc !== null && doc !== undefined);
-		
-	});
-
-	var promise = query.exec();
-	assert.ok(promise instanceof require('mpromise'));
-
-
-	*/
-
-	// Envia o resultado
-
-};
 
 exports.findUserByRecord = function(record, callback){
 	exports.User.findOne({record : record}, callback);
@@ -119,21 +95,3 @@ exports.saveRideIntoUser = function(ride, user){
 	exports.findOneAndUpdate(user);
 
 }
-
-/*
-
-var modelDoc = new MyModel({ foo: 'bar' });
-
-MyModel.findOneAndUpdate(
-    {foo: 'bar'}, // find a document with that filter
-    modelDoc, // document to insert when nothing was found
-    {upsert: true, new: true, runValidators: true}, // options
-    function (err, doc) { // callback
-        if (err) {
-            // handle error
-        } else {
-            // handle document
-        }
-    }
-)
-*/

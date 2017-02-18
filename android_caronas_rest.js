@@ -49,34 +49,33 @@ server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
 
-  var response_code;
+  var response_object;
   // Boolean - Usuário já existe na base de dados do Servidor?
   var isUserRegistred;
 
-  var userToRegister = new user_dao.User({record : record_value });
   // Busca o usuário no banco de dados do Servidor, caso não encontre, devolve 302 para o usuário se cadastrar
-  user_dao.findUserByRecordSendStatus(userToRegister, function(err,model){
+  user_dao.findUserByRecord(record_value, function(err,user_model){
     
-    isUserRegistred = model !== null;
+    isUserRegistred = user_model !== null;
     
     moodle_auth.checkUserExists(record_value, pass_value, res, function(isMoodleUserOk, res){ 
-    var response_code;
+    var response_object;
       // Usuário está ativo no Moodle?
       if(isMoodleUserOk){
         // Usuário já está cadsatrado no Servidor de Caronas?
         if(isUserRegistred){
-          response_code = 200;
+          response_object = {'status_code' : 200 , 'user' : user_model};
         }else{
           // Irá redirecionar para a tela de cadastro
-          response_code = 302;
+          response_object = {'status_code' : 302 , 'user' : {'record' : record_value}};
         }
         
       }else{
-        response_code = 401;
+        response_object = 401;
       }
-      console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_code);
+      console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_object);
 
-      res.send(response_code);
+      res.send(response_object);
     });
 
   });
