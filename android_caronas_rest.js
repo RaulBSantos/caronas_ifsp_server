@@ -48,6 +48,9 @@ server.use(restify.bodyParser({mapParams : true}))
 server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
+	
+  console.log('Tetando logn: '+ record_value + ' : '+pass_value)
+
 
   var response_object;
   // Boolean - Usuário já existe na base de dados do Servidor?
@@ -64,10 +67,10 @@ server.post('/caronas/login',function(req, res) {
       if(isMoodleUserOk){
         // Usuário já está cadsatrado no Servidor de Caronas?
         if(isUserRegistred){
-          response_object = {'status_code' : 200 , 'user' : user_model};
+          response_object = JSON.stringify({'status_code' : 200 , 'user' : user_model});
         }else{
           // Irá redirecionar para a tela de cadastro
-          response_object = {'status_code' : 302 , 'user' : {'record' : record_value}};
+          response_object = JSON.stringify({'status_code' : 302 , 'user' : {'record' : record_value}});
         }
         
       }else{
@@ -75,7 +78,8 @@ server.post('/caronas/login',function(req, res) {
       }
       console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_object);
 
-      res.send(response_object);
+      res.write(response_object);	
+      res.end();
     });
 
   });
