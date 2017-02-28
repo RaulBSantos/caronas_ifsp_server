@@ -74,7 +74,7 @@ server.post('/caronas/login',function(req, res) {
         }
         
       }else{
-        response_object = 401;
+        response_object =  JSON.stringify({'status_code' : 401 , 'user' : undefined });
       }
       console.log("Pront: "+ record_value +", Senha: "+  "pass_value" + " Response: "+response_object);
 
