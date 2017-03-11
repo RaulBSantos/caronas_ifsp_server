@@ -1,17 +1,27 @@
 var request = require('request');
 
+var user_dao = require('../dao/usuarios_dao');
 // Set the headers
 var headers = {
     "Content-Type":     "application/json",
 	"Authorization":	'key=AIzaSyBZin9Fiei3fCyArpy7biPtxO9GzvoD8m4'
 }
-
+// Determine message
+var message_content = {
+	'REQUEST': ' te pediu uma carona ',
+	'OFFER': ' te ofereceu uma carona '
+}
 
 // Função pública
 
 exports.sendNotification = function(notification){
 	if(notification !== undefined){
-		var destination = notification.destination
+		var origin_user = user_dao.findUserByRecord(notification.origin);
+		var destination_user = user_dao.findUserByRecord(notification.destination);
+		
+		var destination = destination_user.firebaseId;
+		var user_name_origin = origin_user.name;
+
 		if(destination !== undefined){
 			// Configure the request
 			var options = {
@@ -22,15 +32,11 @@ exports.sendNotification = function(notification){
 				{
 					 "to" : destination,
 					 "notification" : {
-						 "title" : "Mensagem para o Firebase",
-						 "body" : "Teste firebase"
-					 }, 
-					 "data" : {
-					 	"nome" : "Raul",
-					 	"sobrenome" : "Bolsonaro"
+						 "title" : "Partiu IFSP",
+						 "body" : user_name_origin + message_content[notification.action]
 					 }
 				}
-				
+				//FIXME Configurar o click_action: Intenção de Activity a ser aberta quando clicar
 			}
 
 			// Dispara a requisição
@@ -43,4 +49,4 @@ exports.sendNotification = function(notification){
 		}
 	}
     
-};
+}; 	

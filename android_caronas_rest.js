@@ -88,12 +88,15 @@ server.post('/caronas/login',function(req, res) {
 });
 
 // Teste Firebase
-server.get('/notification',function(req, res) {
-  console.log(req.params.origin);
-  console.log(req.params.action);
-  console.log(req.params.destination);
-  notification.sendNotification();
-  res.end();
+server.post('/caronas/notification',function(req, res) {
+
+	// origin_user = user_dao.findUserByRecord(req.params.origin);
+	// origin_user = user_dao.findUserByRecord(req.params.destination);
+	notification.sendNotification(req.params);
+	// console.log(req.params.action);
+	// console.log(req.params.destination);
+	res.send(200);
+  
 });
 
 // Função que registra o usuário recebido por JSON
