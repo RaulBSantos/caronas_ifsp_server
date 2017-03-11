@@ -12,32 +12,8 @@ var message_content = {
 	'OFFER': ' te ofereceu uma carona '
 }
 
-// Função pública
-
-exports.sendNotification = function(notification){
-	console.log('Inicio sendNotification');
-	
-	
-
-	if(notification !== undefined){
-		var origin_user = undefined;
-		user_dao.findUserByRecord(notification.origin, function(err, returned_user){
-			if (err) return handleError(err);
-
-			origin_user = returned_user;
-		});
-		
-		var destination_user = undefined;
-		user_dao.findUserByRecord(notification.destination, function(err, returned_user){
-			if (err) return handleError(err);
-
-			destination_user = returned_user;
-		});
-		
-		var destination = destination_user.firebaseId;
-		var user_name_origin = origin_user.name;
-
-		if(destination !== undefined){
+function sendToApi(origin, notification, destination){
+	if(destination !== undefined){
 			// Configure the request
 			var options = {
 				url: "https://fcm.googleapis.com/fcm/send",
@@ -62,6 +38,33 @@ exports.sendNotification = function(notification){
 				console.log("Show me your body: : "+body);
 			});
 		}
+}
+
+// Função pública
+
+exports.sendNotification = function(notification){
+	console.log('Inicio sendNotification');
+	
+
+
+	if(notification !== undefined){
+		var user_name_origin = undefined;
+		user_dao.findUserByRecord(notification.origin, function(err, returned_user){
+			if (err) return handleError(err);
+			
+			user_name_origin = returned_user.name;
+			
+		});
+
+		var destination_user = undefined;
+		user_dao.findUserByRecord(notification.destination, function(err, returned_user){
+			if (err) return handleError(err);
+			
+			var firebase_id_destination = returned_user.firebaseId;
+
+			sendToApi(user_name_origin, notification, firebase_id_destination);
+		});
+		
 	}
     
 }; 	
