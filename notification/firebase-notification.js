@@ -24,7 +24,7 @@ function sendToApi(origin, notification, destination){
 					 "to" : destination,
 					 "notification" : {
 						 "title" : "Partiu IFSP",
-						 "body" : user_name_origin + message_content[notification.action]
+						 "body" : origin + message_content[notification.action]
 					 }
 				}
 				//FIXME Configurar o click_action: Intenção de Activity a ser aberta quando clicar
