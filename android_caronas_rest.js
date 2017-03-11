@@ -88,8 +88,10 @@ server.post('/caronas/login',function(req, res) {
 });
 
 // Teste Firebase
-server.get('/firebase',function(req, res) {
-  console.log(req);
+server.get('/notification',function(req, res) {
+  console.log(req.params.origin);
+  console.log(req.params.action);
+  console.log(req.params.destination);
   notification.sendNotification();
   res.end();
 });

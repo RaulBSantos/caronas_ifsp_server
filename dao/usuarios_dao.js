@@ -32,8 +32,8 @@ db.once('open', function() {
   	firebaseId : {type : String, unique: true},
   	canGiveRide : {type : Boolean},
   	phone : {type : String},
-  	email : {type : String}.
-  	location : {latitude : Number, longitude : Number},
+  	email : {type : String},
+  	location : { latitude : {type : Number}, longitude : {type : Number}},
   	ridesOffer : [rideSchema],
   	ridesAsked : [{
   		rideId 		: {type : String}, 
