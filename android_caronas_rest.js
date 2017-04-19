@@ -87,7 +87,7 @@ server.post('/caronas/login',function(req, res) {
 
 });
 
-// Teste Firebase
+// Notificação de carona
 server.post('/caronas/notification',function(req, res) {
 
 	// origin_user = user_dao.findUserByRecord(req.params.origin);
@@ -99,9 +99,29 @@ server.post('/caronas/notification',function(req, res) {
   
 });
 
+server.post('/caronas/confirm-ride', function(req, res){
+  // Envia notificação ao usuário "Carona não foi aceita"
+  // Salva no banco?? Carona como rejeitada??? 
+  logger.debug('Carona confirmada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+
+  res.send(200);
+});
+
+server.post('/caronas/reject-ride', function(req, res){
+  // Envia notificação ao usuário "Carona não foi aceita"
+  // Salva no banco?? Carona como rejeitada??? 
+  logger.debug('Carona rejeitada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+  res.send(200);
+
+});
+
+
+
 // Função que registra o usuário recebido por JSON
 server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var latitude_value = req.params.latitude;
+
+
   var longitude_value = req.params.longitude;
   var name_value = req.params.name;
   var record_value = req.params.record;
