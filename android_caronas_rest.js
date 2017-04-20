@@ -102,7 +102,7 @@ server.post('/caronas/notification',function(req, res) {
 server.post('/caronas/notification/confirm-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
-  logger.debug('Carona confirmada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+  logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
   notification.sendNotification(req.params);
 
   res.send(200);
@@ -111,7 +111,7 @@ server.post('/caronas/notification/confirm-ride', function(req, res){
 server.post('/caronas/notification/reject-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
-  logger.debug('Carona rejeitada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+  logger.info('Carona rejeitada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
   notification.sendNotification(req.params);
   res.send(200);
 
