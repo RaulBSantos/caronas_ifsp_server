@@ -10,7 +10,7 @@ var headers = {
 var message_content = {
 	'REQUEST': ' te pediu uma carona ',
 	'OFFER': ' te ofereceu uma carona ',
-	'ACCEPT': ' aceitou sua carona ',
+	'CONFIRM': ' aceitou sua carona ',
 	'REJECT': ' não aceitou sua carona '
 }
 
