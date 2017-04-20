@@ -9,7 +9,9 @@ var headers = {
 // Determine message
 var message_content = {
 	'REQUEST': ' te pediu uma carona ',
-	'OFFER': ' te ofereceu uma carona '
+	'OFFER': ' te ofereceu uma carona ',
+	'ACCEPT': ' aceitou sua carona ',
+	'REJECT': ' não aceitou sua carona '
 }
 
 function sendToApi(origin, notification, destination){

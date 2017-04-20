@@ -99,18 +99,20 @@ server.post('/caronas/notification',function(req, res) {
   
 });
 
-server.post('/caronas/confirm-ride', function(req, res){
+server.post('/caronas/notifiction/confirm-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
   logger.debug('Carona confirmada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+  notification.sendNotification(req.params);
 
   res.send(200);
 });
 
-server.post('/caronas/reject-ride', function(req, res){
+server.post('/caronas/notification/reject-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
   logger.debug('Carona rejeitada! Sender: ' + req.params.userSender + ' Recipient: ' + req.params.userRecipient + ' Action: ' + req.params.rideAction)
+  notification.sendNotification(req.params);
   res.send(200);
 
 });
