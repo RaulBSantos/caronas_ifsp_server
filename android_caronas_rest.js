@@ -103,7 +103,7 @@ server.post('/caronas/notification/confirm-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
   logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
-  notification.sendNotification(req.params);
+  notification.sendNotificationWithRideDetails(req.params);
 
   res.send(200);
 });

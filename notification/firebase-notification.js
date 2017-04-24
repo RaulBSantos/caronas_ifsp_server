@@ -1,11 +1,32 @@
 var request = require('request');
 
 var user_dao = require('../dao/usuarios_dao');
+
+
+class Notification{
+	constructor(to, title, body){
+		this.to = to;
+		this.notification = {'title' : title, 'body' : body}
+	}
+
+	withClickAction(clickAction){
+		this.notification.clickAction = clickAction;
+		return this;
+	}
+
+	withData(data){
+		this.data = data;
+		return this;
+	}
+}
+
+
 // Set the headers
 var headers = {
     "Content-Type":     "application/json",
 	"Authorization":	'key=AIzaSyBZin9Fiei3fCyArpy7biPtxO9GzvoD8m4'
 }
+
 // Determine message
 var message_content = {
 	'REQUEST': ' te pediu uma carona ',
@@ -43,7 +64,6 @@ function sendToApi(origin, notification, destination){
 }
 
 // Função pública
-
 exports.sendNotification = function(notification){
 	console.log('Inicio sendNotification');
 	
@@ -68,5 +88,16 @@ exports.sendNotification = function(notification){
 		});
 		
 	}
+// Envia notificação de Caronas a ser aberta na Activity de RideDetails
+exports.sendNotificationWithRideDetails = function(notification){
+	// Rascunho
+	let promiseUsers = user_dao.findUsersByRecords(notification.origin, notification.destination); // Devolvendo um Promise
+
+	promiseUsers.then(function(users){
+		
+	});
+
+}
     
 }; 	
+
