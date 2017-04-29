@@ -83,6 +83,7 @@ exports.sendNotification = function(notification){
 		});
 		
 	}
+}
 // Envia notificação de Caronas a ser aberta na Activity de RideDetails
 exports.sendNotificationWithRideDetails = function(notification){
 	console.log('Inicio sendNotificationWithRideDetails');
@@ -111,4 +112,4 @@ exports.sendNotificationWithRideDetails = function(notification){
 			sendToApi(notification_obj);
 		});
 	}
-};
+}
