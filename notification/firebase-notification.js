@@ -10,8 +10,8 @@ class Notification{
 		this.__inner.notification = {'title' : title, 'body' : body}
 	}
 
-	withClickAction(clickAction){
-		this.__inner.notification.clickAction = clickAction;
+	withClickAction(click_action){
+		this.__inner.notification.click_action = click_action;
 		return this;
 	}
 
