@@ -41,22 +41,24 @@ var message_content = {
 
 function sendToApi(notification){
 	if(notification !== undefined){
-			// Configure the request
-			var options = {
-				url: "https://fcm.googleapis.com/fcm/send",
-				headers : headers,
-				json : true,
-				body : 
-				{
-					 notification.getNotification();
-				}
-			}
 
-			// Dispara a requisição
-			request.post(options, function (error, response, body) {
-				if (error) console.log(error);
-			});
+		let notification_obj = notification.getNotification();			
+		// Configure the request
+		let options = {
+			url: "https://fcm.googleapis.com/fcm/send",
+			headers : headers,
+			json : true,
+			body : 
+			{
+				 notification_obj
+			}
 		}
+
+		// Dispara a requisição
+		request.post(options, function (error, response, body) {
+			if (error) console.log(error);
+		});
+	}
 }
 
 // Função pública
