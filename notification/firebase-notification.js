@@ -65,23 +65,34 @@ function sendToApi(notification){
 exports.sendNotification = function(notification){
 	console.log('Inicio sendNotification');
 
-	if(notification !== undefined){
-		var user_name_origin = undefined;
-		user_dao.findUserByRecord(notification.origin, function(err, returned_user){
-			if (err) return handleError(err);
-			
-			user_name_origin = returned_user.name;
-			
-		});
-
-		user_dao.findUserByRecord(notification.destination, function(err, returned_user){
-			if (err) return handleError(err);
-			
-			let notification_obj = new Notification(to=returned_user.firebaseId, title='Partiu IFSP', body=user_name_origin + message_content[notification.action])
+	if(notification !== undefined)
+		let users = {}
+		async.parallel([
+	        //Load user origin
+	        function(callback) {
+	            user_dao.findUserByRecord(notification.origin, function(err, returned_user){
+					if (err) return handleError(err);
+					users.origin = returned_user;
+					callback();
+				});
+	        },
+	        //Load user destination
+	        function(callback) {
+	            user_dao.findUserByRecord(notification.to, function(err, returned_user){
+					if (err) return handleError(err);
+					users.destination = returned_user;
+					callback();
+				});
+	        }
+	    ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
+	    	console.log('user-origiin ' +  users.origin + ' user-destination: ' + users.destination);
+	    	
+	    	let notification_obj = new Notification(to=users.destination.firebaseId, title='Partiu IFSP', body=users.origin.name + message_content[notification.action]);
 
 			sendToApi(notification_obj);
-		});
-		
+
+	    });
+
 	}
 }
 // Envia notificação de Caronas a ser aberta na Activity de RideDetails
@@ -89,27 +100,39 @@ exports.sendNotificationWithRideDetails = function(notification){
 	console.log('Inicio sendNotificationWithRideDetails');
 
 	if(notification !== undefined){
-		var origin_user = undefined;
-		user_dao.findUserByRecord(notification.origin, function(err, returned_user){
-			if (err) return handleError(err);
-			
-			origin_user = returned_user;
-			
-		});
-
-		user_dao.findUserByRecord(notification.destination, function(err, destination_user){
-			if (err) return handleError(err);
-			
-			let notification_obj = new Notification(to=destination_user.firebaseId, title='Partiu IFSP', body=user_name_origin + message_content[notification.action])
+		let users = {}
+		async.parallel([
+	        //Load user origin
+	        function(callback) {
+	            user_dao.findUserByRecord(notification.origin, function(err, returned_user){
+					if (err) return handleError(err);
+					users.origin = returned_user;
+					callback();
+				});
+	        },
+	        //Load user destination
+	        function(callback) {
+	            user_dao.findUserByRecord(notification.to, function(err, returned_user){
+					if (err) return handleError(err);
+					users.destination = returned_user;
+					callback();
+				});
+	        }
+	    ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
+	    	console.log('user-origiin ' +  users.origin + ' user-destination: ' + users.destination);
+	    	
+	    	let notification_obj = new Notification(to=users.destination.firebaseId, title='Partiu IFSP', body=users.origin.name + message_content[notification.action])
 								.withClickAction('OPEN_RIDE_DETAIL_ACTIVITY')
 								.withData(
 									 	{ 'ride' : [ 
-										{ 'user_sender' : origin_user },
-										{ 'user_recipient' : destination_user },
+										{ 'user_sender' : users.origin },
+										{ 'user_recipient' : users.destination },
 										{ 'ride_action' : notification.action } ] }
 									);
 
 			sendToApi(notification_obj);
-		});
+
+	    });
+
 	}
 }
