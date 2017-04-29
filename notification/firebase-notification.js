@@ -1,4 +1,5 @@
 var request = require('request');
+var async = require('async');
 var user_dao = require('../dao/usuarios_dao');
 
 
@@ -41,22 +42,24 @@ var message_content = {
 
 function sendToApi(notification){
 	if(notification !== undefined){
-		console.log('Starting sendToApi.Origin: ' + notification.origin + ' Dest: ' + notification.destination + ' Action: ' + notification.action );
-		let notification_obj = notification.getNotification();			
+		console.log('Starting sendToApi. notification: ' + JSON.stringify(notification));
+		let body = notification.getNotification();
 		// Configure the request
 		let options = {
 			url: "https://fcm.googleapis.com/fcm/send",
 			headers : headers,
 			json : true,
-			body : 
-			{
-				 notification_obj
-			}
+
+		 	body
 		}
 
 		// Dispara a requisição
 		request.post(options, function (error, response, body) {
 			if (error) console.log(error);
+			console.log(options);
+			console.log("Erro: "+error);
+			console.log("Resposta: "+response);
+			console.log("Show me your body: : "+body);
 		});
 	}
 }
