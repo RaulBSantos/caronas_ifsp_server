@@ -92,7 +92,8 @@ server.post('/caronas/notification',function(req, res) {
 
 	// origin_user = user_dao.findUserByRecord(req.params.origin);
 	// origin_user = user_dao.findUserByRecord(req.params.destination);
-	notification.sendNotification(req.params);
+	console.log( '/notification - Params: ' + JSON.stringify(req.params));
+	notification.sendNotification(JSON.stringify(req.params));
 	// console.log(req.params.action);
 	// console.log(req.params.destination);
 	res.send(200);

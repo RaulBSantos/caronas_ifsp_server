@@ -41,7 +41,7 @@ var message_content = {
 
 function sendToApi(notification){
 	if(notification !== undefined){
-
+		console.log('Starting sendToApi.Origin: ' + notification.origin + ' Dest: ' + notification.destination + ' Action: ' + notification.action );
 		let notification_obj = notification.getNotification();			
 		// Configure the request
 		let options = {
