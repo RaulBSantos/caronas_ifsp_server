@@ -65,8 +65,8 @@ function sendToApi(notification){
 exports.sendNotification = function(notification){
 	console.log('Inicio sendNotification');
 
-	if(notification !== undefined)
-		let users = {}
+	if(notification !== undefined){
+		let users = {};
 		async.parallel([
 	        //Load user origin
 	        function(callback) {
@@ -78,7 +78,7 @@ exports.sendNotification = function(notification){
 	        },
 	        //Load user destination
 	        function(callback) {
-	            user_dao.findUserByRecord(notification.to, function(err, returned_user){
+	            user_dao.findUserByRecord(notification.destination, function(err, returned_user){
 					if (err) return handleError(err);
 					users.destination = returned_user;
 					callback();
@@ -112,7 +112,7 @@ exports.sendNotificationWithRideDetails = function(notification){
 	        },
 	        //Load user destination
 	        function(callback) {
-	            user_dao.findUserByRecord(notification.to, function(err, returned_user){
+	            user_dao.findUserByRecord(notification.destination, function(err, returned_user){
 					if (err) return handleError(err);
 					users.destination = returned_user;
 					callback();
