@@ -1,22 +1,26 @@
 var request = require('request');
-
 var user_dao = require('../dao/usuarios_dao');
 
 
 class Notification{
 	constructor(to, title, body){
-		this.to = to;
-		this.notification = {'title' : title, 'body' : body}
+		this.__inner = {}
+		this.__inner.to = to;
+		this.__inner.notification = {'title' : title, 'body' : body}
 	}
 
 	withClickAction(clickAction){
-		this.notification.clickAction = clickAction;
+		this.__inner.notification.clickAction = clickAction;
 		return this;
 	}
 
 	withData(data){
-		this.data = data;
+		this.__inner.data = data;
 		return this;
+	}
+
+	getNotification(){
+		return this.__inner;
 	}
 }
 
@@ -35,8 +39,8 @@ var message_content = {
 	'REJECT': ' não aceitou sua carona '
 }
 
-function sendToApi(origin, notification, destination){
-	if(destination !== undefined){
+function sendToApi(notification){
+	if(notification !== undefined){
 			// Configure the request
 			var options = {
 				url: "https://fcm.googleapis.com/fcm/send",
@@ -44,21 +48,13 @@ function sendToApi(origin, notification, destination){
 				json : true,
 				body : 
 				{
-					 "to" : destination,
-					 "notification" : {
-						 "title" : "Partiu IFSP",
-						 "body" : origin + message_content[notification.action]
-					 }
+					 notification.getNotification();
 				}
-				//FIXME Configurar o click_action: Intenção de Activity a ser aberta quando clicar
 			}
 
 			// Dispara a requisição
 			request.post(options, function (error, response, body) {
-				console.log(options);
-				console.log("Erro: "+error);
-				console.log("Resposta: "+response);
-				console.log("Show me your body: : "+body);
+				if (error) console.log(error);
 			});
 		}
 }
@@ -66,8 +62,6 @@ function sendToApi(origin, notification, destination){
 // Função pública
 exports.sendNotification = function(notification){
 	console.log('Inicio sendNotification');
-	
-
 
 	if(notification !== undefined){
 		var user_name_origin = undefined;
@@ -78,26 +72,41 @@ exports.sendNotification = function(notification){
 			
 		});
 
-		var destination_user = undefined;
 		user_dao.findUserByRecord(notification.destination, function(err, returned_user){
 			if (err) return handleError(err);
 			
-			var firebase_id_destination = returned_user.firebaseId;
+			let notification_obj = new Notification(to=returned_user.firebaseId, title='Partiu IFSP', body=user_name_origin + message_content[notification.action])
 
-			sendToApi(user_name_origin, notification, firebase_id_destination);
+			sendToApi(notification_obj);
 		});
 		
 	}
 // Envia notificação de Caronas a ser aberta na Activity de RideDetails
 exports.sendNotificationWithRideDetails = function(notification){
-	// Rascunho
-	let promiseUsers = user_dao.findUsersByRecords(notification.origin, notification.destination); // Devolvendo um Promise
+	console.log('Inicio sendNotificationWithRideDetails');
 
-	promiseUsers.then(function(users){
-		
-	});
+	if(notification !== undefined){
+		var origin_user = undefined;
+		user_dao.findUserByRecord(notification.origin, function(err, returned_user){
+			if (err) return handleError(err);
+			
+			origin_user = returned_user;
+			
+		});
 
-}
-    
-}; 	
+		user_dao.findUserByRecord(notification.destination, function(err, destination_user){
+			if (err) return handleError(err);
+			
+			let notification_obj = new Notification(to=destination_user.firebaseId, title='Partiu IFSP', body=user_name_origin + message_content[notification.action])
+								.withClickAction('OPEN_RIDE_DETAIL_ACTIVITY')
+								.withData(
+									 	{ 'ride' : [ 
+										{ 'user_sender' : origin_user },
+										{ 'user_recipient' : destination_user },
+										{ 'ride_action' : notification.action } ] }
+									);
 
+			sendToApi(notification_obj);
+		});
+	}
+};
