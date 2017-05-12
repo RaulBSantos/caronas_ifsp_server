@@ -1,3 +1,116 @@
+/*
+	Esquema do banco:
+	
+	1 Raul pede carona p/ Maria
+	2 Maria aceita dar carona para Raul
+	3 Raul oferece carona para Pedro
+	4 Pedro aceita carona de Raul
+
+	1 )
+{
+		nome : "Raul",
+		record : 1238976,
+		location : { latitude : 8743.97, longitude : 17613.89 },
+		pendingRides :  [ { { user : { nome : "Maria", record : 545234 , location : 
+						{ latitude : 9999.97, longitude : 10000.89 } }
+						  },  driver : false, dateRequest : "20/04/2017 10:20:00", dateResponse : null  } ], 
+	  confirmedRides : []
+},
+	
+	
+{
+		nome : "Maria",
+		record : 545234,
+		location : { latitude : 9999.97, longitude : 10000.89 },
+		pendingRides :  [ { { user : { nome : "Raul", record : 1238976 , location : 
+						{ latitude : 8743.97, longitude : 17613.89 } }
+						  },  driver : true, dateRequest : "20/04/2017 10:20:00", dateResponse : null } ],
+		confirmedRides : []
+						  
+}
+
+	2 )
+
+{
+		nome : "Raul",
+		record : 1238976,
+		location : { latitude : 8743.97, longitude : 17613.89 },
+		confirmedRides :  [ { { user : { nome : "Maria", record : 545234 , location : 
+						{ latitude : 9999.97, longitude : 10000.89 } }
+						  },  driver : false, dateRequest : "20/04/2017 10:20:00", dateResponse : "21/04/2017 22:59:40"  } ], 
+	  pendingRides : []
+}
+	
+	
+{
+		nome : "Maria",
+		record : 545234,
+		location : { latitude : 9999.97, longitude : 10000.89 },
+		pendingRides : []
+		
+		confirmedRides :  [ { { user : { nome : "Raul", record : 1238976 , location : 
+						{ latitude : 8743.97, longitude : 17613.89 } }
+						  },  driver : true, dateRequest : "20/04/2017 10:20:00", dateResponse : "21/04/2017 22:59:40" } ],
+		
+						  
+},
+
+ 	3 )
+
+{
+		nome : "Raul",
+		record : 1238976,
+		location : { latitude : 8743.97, longitude : 17613.89 },
+		confirmedRides :  [ { { user : { nome : "Maria", record : 545234 , location : 
+						{ latitude : 9999.97, longitude : 10000.89 } }
+						  },  driver : false, dateRequest : "20/04/2017 10:20:00", dateResponse : "21/04/2017 22:59:40"  } ], 
+	  pendingRides : [ { user : { nome : "Pedro", record : 090807 , location : 
+						{ latitude : 323232.97, longitude : 2332.22 } }
+						  },  driver : true, dateRequest : "23/04/2017 10:20:00", dateResponse : null } ] ]
+},
+
+{
+  nome : "Pedro", 
+  record : 090807 , 
+  location : { latitude : 323232.97, longitude : 2332.22 }, 
+  confirmedRides : [],
+  pendingRides : [ { user : { nome : "Raul", record : 1238976 , location : 
+						{ latitude : 8743.97, longitude : 17613.89 } }
+						  },  driver : false, dateRequest : "23/04/2017 10:20:00", dateResponse : null } ] ]
+  
+},
+
+	4 )
+
+{
+		nome : "Raul",
+		record : 1238976,
+		location : { latitude : 8743.97, longitude : 17613.89 },
+		confirmedRides :  [ 
+  		        { { user : { nome : "Maria", record : 545234 , location : 
+  						  { latitude : 9999.97, longitude : 10000.89 } }
+  						    },  driver : false, dateRequest : "20/04/2017 10:20:00", dateResponse : "21/04/2017 22:59:40"  },
+  						    
+  			      { user : { nome : "Pedro", record : 090807 , location : 
+  						  { latitude : 323232.97, longitude : 2332.22 } }
+  						    },  driver : true, dateRequest : "23/04/2017 10:20:00", dateResponse : "25/04/2017 02:55:13" } ]
+  					], 
+	  pendingRides : []
+},
+
+{
+  nome : "Pedro", 
+  record : 090807 , 
+  location : { latitude : 323232.97, longitude : 2332.22 }, 
+  confirmedRides : [{ user : { nome : "Raul", record : 1238976 , location : 
+						{ latitude : 8743.97, longitude : 17613.89 } }
+						  },  driver : false, dateRequest : "23/04/2017 10:20:00", dateResponse : "25/04/2017 02:55:13" }],
+  pendingRides : []
+  
+}
+
+*/
+
 // Objetos para manusear promises
 var assert = require('assert');
 var Promise = require('mpromise');
@@ -10,7 +123,7 @@ var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
-  // Conectado
+  // Conectado 
   // Criando um Schema de carona
   var rideSchema = mongoose.Schema({
   	daysOfWeek : [String],

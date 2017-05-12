@@ -49,7 +49,7 @@ server.post('/caronas/login',function(req, res) {
   var record_value = req.params.record;
   var pass_value = req.params.password;
 	
-  console.log('Tetando logn: '+ record_value + ' : '+pass_value)
+  console.log('Tentando logn: '+ record_value + ' : ******');
 
 
   var response_object;
@@ -92,6 +92,13 @@ server.post('/caronas/notification',function(req, res) {
 
 	// origin_user = user_dao.findUserByRecord(req.params.origin);
 	// origin_user = user_dao.findUserByRecord(req.params.destination);
+  let message = undefined;
+  if ('OFFER' === req.params.action){
+    message = 'Oferta de carona realizada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination;
+  }else if ('REQUEST' === req.params.action){
+    message = 'Pedido de carona realizado! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination;
+  }
+  logger.info(message);
 	notification.sendNotificationWithRideDetails(req.params);
 	// console.log(req.params.action);
 	// console.log(req.params.destination);
