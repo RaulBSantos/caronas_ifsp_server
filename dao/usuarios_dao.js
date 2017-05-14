@@ -6,6 +6,9 @@
 	3 Raul oferece carona para Pedro
 	4 Pedro aceita carona de Raul
 
+	listener
+
+
 	1 )
 {
 		nome : "Raul",
@@ -115,6 +118,7 @@
 var assert = require('assert');
 var Promise = require('mpromise');
 var promise = new Promise;
+var async = require('async');
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/caronas');
@@ -126,12 +130,12 @@ db.once('open', function() {
   // Conectado 
   // Criando um Schema de carona
   var rideSchema = mongoose.Schema({
-  	daysOfWeek : [String],
-  	ways : [{
-  		direction : {type : String}, time :{type : String}, vacancyNumber : {type : Number}
-  	}],
-  	route : {},
-  	usersPending : []
+	 user : { name : {type : String }, record : { type : String },
+		location : { latitude : {type : Number}, longitude : {type : Number}}
+	 },
+	 driver : { type : Boolean },
+	 dateRequest : { type : Date},
+	 dateResponse : { type : Date}
   });
 
   var Ride = mongoose.model('Ride', rideSchema);
@@ -147,7 +151,7 @@ db.once('open', function() {
   	phone : {type : String},
   	email : {type : String},
   	location : { latitude : {type : Number}, longitude : {type : Number}},
-  	ridesOffer : [rideSchema],
+  	ridesOffer : [Object],
   	ridesAsked : [{
   		rideId 		: {type : String}, 
   		driverId 	: {type : String} }]
@@ -194,6 +198,55 @@ exports.findOneAndUpdate = function(user){
 		});
 };
 
+exports.addPendingRequestRide = function(askingUserRecordId, offerUserRecordId){
+	// Find other User
+	console.log('Starting addPendingRequestRide');
+	var askingUser = undefined;
+	var offerUser = undefined;
+
+	async.parallel([
+        //Load user origin
+        function(callback) {
+        	User.find({ 'record' : offerUserRecordId }
+        		, 'name record location', 
+        		function (err, doc_user) {
+        			if (err) return handleError(err);
+        			offerUser = doc_user;
+        			console.log('Finded ' + offerUserRecordId);
+        			callback();
+				});
+        },
+        //Load user destination
+        function(callback) {
+            User.find({ 'record' : askingUserRecordId }
+        		, 'name record location', 
+        		function (err, doc_user) {
+        			if (err) return handleError(err);
+        			askingUser = doc_user;
+        			console.log('Finded ' + askingUserRecordId);
+        			callback();
+				});
+        }
+    ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
+    	// Update
+    	User.update(
+		    { 'record' : offerUserRecordId },
+		    { "$push": { "pendingRides": { 'user' : askingUser, 'driver' : false, 'requestDate' : new Date(), 'responseDate' : undefined } } },
+	    function(err,numAffected) {
+	       // something with the result in here
+	       console.log('Updated ' + offerUserRecordId + '. Rows affected: ' + numAffected);
+	    });
+
+	    User.update(
+		    { 'record' : askingUserRecordId },
+		    { "$push": { "pendingRides": { 'user' : offerUser, 'driver' : true, 'requestDate' : new Date(), 'responseDate' : undefined } } },
+	    function(err,numAffected) {
+	       // something with the result in here
+	       console.log('Updated ' + askingUserRecordId + '. Rows affected: ' + numAffected);
+	    });
+    });
+};
+
 exports.findAllUsers = function(callback){
 	exports.User.find(function (err,users){
 		if(err) return console.error(err);
@@ -208,5 +261,7 @@ exports.saveRideIntoUser = function(ride, user){
 	user.ridesOffer.push(ride);
 	console.log("saving ride in user...");
 	exports.findOneAndUpdate(user);
-
 }
+
+// Teste
+addPendingRequestRide('136208-9', '136263-1');
