@@ -100,16 +100,16 @@ server.post('/caronas/notification',function(req, res) {
   }
   logger.info(message);
 	notification.sendNotificationWithRideDetails(req.params);
-	// console.log(req.params.action);
-	// console.log(req.params.destination);
+  user_dao.addPendingRequestRide(req.params.origin, req.params.destination);
+
 	res.send(200);
-  
 });
 
 server.post('/caronas/notification/confirm-ride', function(req, res){
   // Envia notificação ao usuário "Carona não foi aceita"
   // Salva no banco?? Carona como rejeitada??? 
   logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
+
   notification.sendNotification(req.params);
 
   res.send(200);
