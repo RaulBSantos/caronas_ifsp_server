@@ -9,6 +9,9 @@ mongoose.set('debug', true);
 mongoose.connect('mongodb://localhost/caronas');
 
 var db = mongoose.connection;
+var User = undefined;
+var Ride = undefined;
+
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -23,7 +26,7 @@ db.once('open', function() {
 	 dateResponse : { type : Date}
   });
 
-  var Ride = mongoose.model('Ride', rideSchema);
+  Ride = mongoose.model('Ride', rideSchema);
 
   exports.Ride = Ride;
 
@@ -41,7 +44,7 @@ db.once('open', function() {
   	ridesAsked : [rideSchema]
   });
   // Convertendo o Schema em um Model do usuário
-  var User = mongoose.model('User', userSchema);
+  User = mongoose.model('User', userSchema);
 
   // Tornando pública
   exports.User = User;
