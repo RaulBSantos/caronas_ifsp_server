@@ -100,28 +100,23 @@ server.post('/caronas/notification',function(req, res) {
   }
   logger.info(message);
 	notification.sendNotificationWithRideDetails(req.params);
-  user_dao.addPendingRequestRide(req.params.origin, req.params.destination);
-
-	res.send(200);
+  
+  res.send(200);
 });
 
 server.post('/caronas/notification/confirm-ride', function(req, res){
-  // Envia notificação ao usuário "Carona não foi aceita"
-  // Salva no banco?? Carona como rejeitada??? 
   logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
-
   notification.sendNotification(req.params);
+  user_dao.addRide(req.params.origin, req.params.destination, true);
 
   res.send(200);
 });
 
 server.post('/caronas/notification/reject-ride', function(req, res){
-  // Envia notificação ao usuário "Carona não foi aceita"
-  // Salva no banco?? Carona como rejeitada??? 
   logger.info('Carona rejeitada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
   notification.sendNotification(req.params);
+  user_dao.addRide(req.params.origin, req.params.destination, false);
   res.send(200);
-
 });
 
 
@@ -129,8 +124,6 @@ server.post('/caronas/notification/reject-ride', function(req, res){
 // Função que registra o usuário recebido por JSON
 server.post('/caronas/register_user_and_coordinates',function(req, res) {
   var latitude_value = req.params.latitude;
-
-
   var longitude_value = req.params.longitude;
   var name_value = req.params.name;
   var record_value = req.params.record;

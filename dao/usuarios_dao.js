@@ -39,9 +39,8 @@ db.once('open', function() {
   	phone : {type : String},
   	email : {type : String},
   	location : { latitude : {type : Number}, longitude : {type : Number}},
-  	ridesOffer : [rideSchema],
-  	pendingRides : [rideSchema],
-  	ridesAsked : [rideSchema]
+  	confirmedRides : [rideSchema],
+  	rejectedRides : [rideSchema]
   });
   // Convertendo o Schema em um Model do usuário
   User = mongoose.model('User', userSchema);
@@ -56,12 +55,6 @@ db.once('open', function() {
 exports.saveUser = function(user){
 	console.log('saveUser()'+user);
 	user.save();
-	/*
-	var promise = user.save();
-
-	assert.ok(promise instanceof require('mpromise'));
-	*/
-    
 };
 
 exports.findUserByRecord = function(record, callback){
@@ -86,12 +79,12 @@ exports.findOneAndUpdate = function(user){
 		});
 };
 
-exports.addPendingRequestRide = function(askingUserRecordId, offerUserRecordId){
+exports.addRide = function(askingUserRecordId, offerUserRecordId, isConfirm){
 	// Find other User
-	console.log('Starting addPendingRequestRide');
+	console.log('***Starting addRide***');
 	var askingUser = undefined;
 	var offerUser = undefined;
-
+	
 	async.parallel([
         //Load user origin
         function(callback) {
@@ -100,7 +93,7 @@ exports.addPendingRequestRide = function(askingUserRecordId, offerUserRecordId){
         		function (err, doc_user) {
         			if (err) return handleError(err);
         			offerUser = doc_user[0];
-        			console.log('Finded  %s %s ', doc_user.name, doc_user.record);
+        			console.log('Finded  %s %s ', offerUser.name, offerUser.record);
         			callback();
 				});
         },
@@ -112,27 +105,48 @@ exports.addPendingRequestRide = function(askingUserRecordId, offerUserRecordId){
         			if (err) return handleError(err);
         			delete doc_user._id;
         			askingUser = doc_user[0];
-        			console.log('Nome: '+ doc_user[0].name + ' Total: '+JSON.stringify(doc_user[0]));
+        			console.log('Finded  %s %s ', askingUser.name, askingUser.record);
         			callback();
 				});
         }
     ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
+    	console.log(offerUserRecordId + ' | ' + ' | ' + askingUserRecordId);
     	// Update
-    	User.update(
-		    { 'record' : offerUserRecordId },
-		    { "$push": { "pendingRides":  { user : askingUser, driver : false, dateRequest : Date.now() }  } },
-	    function(err,numAffected) {
-	       // something with the result in here
-	       console.log('Updated ' + offerUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
-	    });
+    	if ( isConfirm ){
+    		console.log('*+*+* IS CONFIRM *+*+*');
+	    	User.update(
+			    { 'record' : offerUserRecordId },
+			    { "$push": { "confirmedRides" :  { user : askingUser, driver : false, dateRequest : Date.now() }  } },
+		    function(err,numAffected) {
+		       // something with the result in here
+		       console.log('Updated ' + offerUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
+		    });
 
-	    User.update(
-		    { 'record' : askingUserRecordId },
-		    { "$push": { "pendingRides":  { user : offerUser, driver : true, dateRequest : Date.now() } } },
-	    function(err,numAffected) {
-	       // something with the result in here
-	       console.log('Updated ' + askingUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
-	    });
+		    User.update(
+			    { 'record' : askingUserRecordId },
+			    { "$push": { "confirmedRides" :  { user : offerUser, driver : true, dateRequest : Date.now() } } },
+		    function(err,numAffected) {
+		       // something with the result in here
+		       console.log('Updated ' + askingUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
+		    });
+		}else{
+			console.log('*+*+* IS REJECT *+*+*');
+			User.update(
+			    { 'record' : offerUserRecordId },
+			    { "$push": { "rejectedRides" :  { user : askingUser, driver : false, dateRequest : Date.now() }  } },
+		    function(err,numAffected) {
+		       // something with the result in here
+		       console.log('Updated ' + offerUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
+		    });
+
+		    User.update(
+			    { 'record' : askingUserRecordId },
+			    { "$push": { "rejectedRides" :  { user : offerUser, driver : true, dateRequest : Date.now() } } },
+		    function(err,numAffected) {
+		       // something with the result in here
+		       console.log('Updated ' + askingUserRecordId + '. Rows affected: ' + JSON.stringify(numAffected));
+		    });
+		}
     });
 };
 
@@ -151,6 +165,3 @@ exports.saveRideIntoUser = function(ride, user){
 	console.log("saving ride in user...");
 	exports.findOneAndUpdate(user);
 }
-
-
-
