@@ -18,7 +18,7 @@ db.once('open', function() {
   // Conectado 
   // Criando um Schema de carona
   var rideSchema = mongoose.Schema({
-	 user : { name : {type : String }, record : { type : String }, phone : {type : String}, email : {type : String},
+	 user : { name : {type : String }, record : { type : String, unique : true }, phone : {type : String}, email : {type : String},
 		location : { latitude : {type : Number}, longitude : {type : Number}}
 	 },
 	 driver : { type : Boolean },
