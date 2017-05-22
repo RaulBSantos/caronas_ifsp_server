@@ -37,20 +37,20 @@ var message_content = {
 	'REQUEST': ' te pediu uma carona ',
 	'OFFER': ' te ofereceu uma carona ',
 	'CONFIRM': ' aceitou sua carona ',
-	'REJECT': ' não aceitou sua carona '
+	'REJECT': ' não aceitou sua carona ',
+	'CANCEL': ' cancelou a carona '
 }
 
 function sendToApi(notification){
 	if(notification !== undefined){
 		console.log('Starting sendToApi. notification: ' + JSON.stringify(notification));
-		let body = notification.getNotification();
+		let notification_body = notification.getNotification();
 		// Configure the request
 		let options = {
 			url: "https://fcm.googleapis.com/fcm/send",
 			headers : headers,
 			json : true,
-
-		 	body
+		 	notification_body
 		}
 
 		// Dispara a requisição
@@ -59,7 +59,7 @@ function sendToApi(notification){
 			console.log(options);
 			console.log("Erro: "+error);
 			console.log("Resposta: "+response);
-			console.log("Show me your body: : "+body);
+			console.log("Show me your body: : "+notification_body);
 		});
 	}
 }

@@ -89,7 +89,6 @@ server.post('/caronas/login',function(req, res) {
 
 // Notificação de carona
 server.post('/caronas/notification',function(req, res) {
-
 	// origin_user = user_dao.findUserByRecord(req.params.origin);
 	// origin_user = user_dao.findUserByRecord(req.params.destination);
   let message = undefined;
@@ -105,7 +104,7 @@ server.post('/caronas/notification',function(req, res) {
 });
 
 server.post('/caronas/notification/confirm-ride', function(req, res){
-  logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
+  logger.info('Carona confirmada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action);
   notification.sendNotification(req.params);
   user_dao.addRide(req.params.origin, req.params.destination, true);
 
@@ -113,11 +112,17 @@ server.post('/caronas/notification/confirm-ride', function(req, res){
 });
 
 server.post('/caronas/notification/reject-ride', function(req, res){
-  logger.info('Carona rejeitada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action)
+  logger.info('Carona rejeitada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action);
   notification.sendNotification(req.params);
   user_dao.addRide(req.params.origin, req.params.destination, false);
   res.send(200);
 });
+
+server.post('/caronas/notification/cancel-ride', function(req, res){
+  logger.info('Carona cancelada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action);
+  notification.sendNotification(req.params);
+  user_dao.deleteRide(req.params.origin, req.params.destination);
+}
 
 
 
@@ -143,7 +148,7 @@ server.post('/caronas/register_user_and_coordinates',function(req, res) {
   user_dao.saveUser(user);
 
   res.send(200);
-});
+  });
 
 // Função que registra uma carona ao usuário
 server.post('/caronas/register_ride',function(req, res) {

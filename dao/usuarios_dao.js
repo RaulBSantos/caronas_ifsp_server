@@ -18,7 +18,7 @@ db.once('open', function() {
   // Conectado 
   // Criando um Schema de carona
   var rideSchema = mongoose.Schema({
-	 user : { name : {type : String }, record : { type : String, unique : true }, phone : {type : String}, email : {type : String},
+	 user : { name : {type : String }, record : { type : String}, phone : {type : String}, email : {type : String},
 		location : { latitude : {type : Number}, longitude : {type : Number}}
 	 },
 	 driver : { type : Boolean },
@@ -45,6 +45,7 @@ db.once('open', function() {
   // Convertendo o Schema em um Model do usuário
   User = mongoose.model('User', userSchema);
 
+  
   // Tornando pública
   exports.User = User;
 });
@@ -149,6 +150,38 @@ exports.addRide = function(askingUserRecordId, offerUserRecordId, isConfirm){
 		}
     });
 };
+
+deleteRide = function(originUserRecord, destinationUserRecord){
+	// Busca user origin, deleta carona que o usuario destination participa
+	// Busca user destination, deleta carona que o usuario origin participa
+	async.parallel([
+        //Load user origin
+        function(callback) {
+        	User.update({'record' : originUserRecord},
+        				{ $pull: { "confirmedRides" : { "driver" : "false" } }},
+        				function (err, numAffected) {
+		        			if (err) return handleError(err);
+		        			console.log('Updated  %s' + JSON.stringify(numAffected))
+		        			callback();
+						}
+
+      //   				{ $pull: { "confirmedRides" : { 'user': { 'record' : destinationUserRecord } } } },
+      //   				function (err, numAffected) {
+		    //     			if (err) return handleError(err);
+		    //     			console.log('Updated  %s' + numAffected);
+		    //     			callback();
+						// }
+        		);
+        },
+        //Load user destination
+        function(callback) {
+            console.log('Test - remove too');
+            callback();
+        }
+    ], function(err) { //This function gets called after the two tasks have called their "task callbacks"
+    	console.log('Carona removida!');
+    });
+}
 
 exports.findAllUsers = function(callback){
 	exports.User.find(function (err,users){
