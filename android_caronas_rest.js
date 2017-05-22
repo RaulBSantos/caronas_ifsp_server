@@ -122,7 +122,7 @@ server.post('/caronas/notification/cancel-ride', function(req, res){
   logger.info('Carona cancelada! Origem: ' + req.params.origin + ' Destino: ' + req.params.destination + ' Ação: ' + req.params.action);
   notification.sendNotification(req.params);
   user_dao.deleteRide(req.params.origin, req.params.destination);
-}
+});
 
 
 
